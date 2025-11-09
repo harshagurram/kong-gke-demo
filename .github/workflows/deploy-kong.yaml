@@ -26,9 +26,9 @@ jobs:
       OIDC_ISSUER: ${{ vars.OIDC_ISSUER }}
       REDIS_HOST: ${{ vars.REDIS_HOST }}
       REDIS_PORT: ${{ vars.REDIS_PORT }}
-      CLIENT_SECRET_BASIC: ${{ secrets.CLIENT_SECRET_BASIC }}
-      CLIENT_SECRET_PLUS: ${{ secrets.CLIENT_SECRET_PLUS }}
-      CLIENT_SECRET_PREMIUM: ${{ secrets.CLIENT_SECRET_PREMIUM }}
+      KEYCLOAK_CLIENT_SECRET_BASIC: ${{ secrets.KEYCLOAK_CLIENT_SECRET_BASIC }}
+      KEYCLOAK_CLIENT_SECRET_PLUS: ${{ secrets.KEYCLOAK_CLIENT_SECRET_BASIC }}
+      KEYCLOAK_CLIENT_SECRET_PREMIUM: ${{ secrets.KEYCLOAK_CLIENT_SECRET_BASIC }}
       KONNECT_TOKEN: ${{ secrets.KONNECT_PAT }}
 
     steps:
@@ -43,7 +43,7 @@ jobs:
           cat kong.yaml.rendered
 
       - name: Validate configuration
-        run: deck validate --state kong.yaml.rendered
+        run: deck gateway validate kong.yaml.rendered
       
       - name: Check Connectivity
         run: |
