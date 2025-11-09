@@ -37,9 +37,8 @@ jobs:
 
       - name: Render kong.yaml
         run: |
-          docker run --rm \
-            -v $PWD:/app -w /app alpine \
-            sh -c "apk add gettext >/dev/null && envsubst < config/kong.yaml > kong.yaml.rendered"
+          apk add gettext >/dev/null 
+          envsubst < config/kong.yaml > kong.yaml.rendered
           echo "Rendered kong.yaml:"
           cat kong.yaml.rendered
 
