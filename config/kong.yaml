@@ -184,7 +184,7 @@ services:
                 - partner_basic
                 - partner_plus
                 - partner_premium
-            include_consumer_groups: true
+              include_consumer_groups: true
           - name: proxy-cache-advanced
             config:
               strategy: redis
@@ -208,7 +208,7 @@ services:
               allow:
                 - partner_plus
                 - partner_premium
-            include_consumer_groups: true
+              include_consumer_groups: true
 
   - name: keycloak-token-service
     host: ${KEYCLOAK_HOST}
