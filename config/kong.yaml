@@ -193,9 +193,9 @@ services:
               request_method:
               - GET
               - HEAD
-              partials:
-                - name: redis-master
-                  path: config.redis
+            partials:
+              - name: redis-master
+                path: config.redis
 
       - name: transactions-route
         paths:
