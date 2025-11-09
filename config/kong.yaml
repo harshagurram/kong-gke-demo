@@ -56,6 +56,7 @@ partials:
       database: 0
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      keepalive_backlog: 0
       username: null
       password: null
       ssl: false
@@ -72,8 +73,8 @@ plugins:
   - name: prometheus
     enabled: true
     config:
-      latency_metrics: true
-      bandwidth_metrics: true
+      latency_metrics: false
+      bandwidth_metrics: false
       status_code_metrics: true
   - name: correlation-id
     enabled: true
@@ -183,6 +184,7 @@ services:
                 - partner_basic
                 - partner_plus
                 - partner_premium
+            include_consumer_groups: true
           - name: proxy-cache-advanced
             config:
               strategy: redis
@@ -196,14 +198,17 @@ services:
       - name: transactions-route
         paths:
           - ~/accounts/(?<account_id>[^/]+)/(?<action>credit|debit)
+        strip_path: false
         methods: [POST]
         protocols: [http, https]
+        regex_priority: 1
         plugins:
           - name: acl
             config:
               allow:
                 - partner_plus
                 - partner_premium
+            include_consumer_groups: true
 
   - name: keycloak-token-service
     host: ${KEYCLOAK_HOST}

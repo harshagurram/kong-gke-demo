@@ -54,14 +54,14 @@ jobs:
       
       - name: Check Diff
         run: |
-          deck gateway diff  ./kong.yaml.rendered \
+          deck gateway diff --skip-consumers ./kong.yaml.rendered \
             --konnect-addr $KONNECT_URL \
             --konnect-control-plane-name $CONTROL_PLANE_NAME \
             --konnect-token $KONNECT_TOKEN
 
 #      - name: Deploy configuration
 #        run: |
-#          deck gateway sync ./kong.yaml.rendered \
+#          deck gateway sync --skip-consumers ./kong.yaml.rendered \
 #           --konnect-addr $KONNECT_URL \
 #            --konnect-control-plane-name $CONTROL_PLANE_NAME \
 #            --konnect-token $KONNECT_TOKEN
