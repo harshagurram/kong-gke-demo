@@ -50,8 +50,7 @@ consumer_groups:
 # REDIS CONNECTION (shared partial)
 # -----------------------------
 partials: 
-  - id: redis-config
-    name: redis-shared
+  - name: redis-master
     type: redis-ee
     config:
       database: 0
@@ -76,6 +75,50 @@ plugins:
       latency_metrics: true
       bandwidth_metrics: true
       status_code_metrics: true
+  - name: correlation-id
+    enabled: true
+    config:
+      echo_downstream: false
+      generator: uuid#counter
+      header_name: Kong-Request-Cor-ID
+  - name: rate-limiting-advanced
+    enabled: true
+    instance_name: RLA_Plus
+    consumer_group: partner_plus
+    route: transactions-route
+    config:
+      error_code: 429
+      error_message: API rate limit exceeded
+      identifier: consumer
+      limit:
+      - 3
+      window_size:
+      - 30
+      window_type: sliding
+      strategy: redis
+      sync_rate: 0
+    partials:
+    - name: redis-master
+      path: config.redis
+  - name: rate-limiting-advanced
+    instance_name: RLA_Premium
+    consumer_group: partner_premium
+    enabled: true
+    route: transactions-route
+    config:
+      error_code: 429
+      error_message: API rate limit exceeded
+      identifier: consumer
+      limit:
+      - 5
+      window_size:
+      - 30
+      window_type: sliding
+      strategy: redis
+      sync_rate: 0
+    partials:
+    - name: redis-master
+      path: config.redis
 
 # -----------------------------
 # SERVICES
@@ -147,8 +190,7 @@ services:
               response_code: [200]
               request_method: [GET]
               partials:
-                - id: redis-config
-                  name: redis-shared
+                - name: redis-master
                   path: config.redis
 
       - name: transactions-route
