@@ -92,7 +92,7 @@ plugins:
       error_message: API rate limit exceeded
       identifier: consumer
       limit:
-      - 3
+      - ${RL_PLUS}
       window_size:
       - 30
       window_type: sliding
@@ -111,7 +111,7 @@ plugins:
       error_message: API rate limit exceeded
       identifier: consumer
       limit:
-      - 5
+      - ${RL_PREMIUM}
       window_size:
       - 30
       window_type: sliding
