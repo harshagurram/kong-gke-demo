@@ -30,6 +30,8 @@ jobs:
       KEYCLOAK_CLIENT_SECRET_PLUS: ${{ secrets.KEYCLOAK_CLIENT_SECRET_BASIC }}
       KEYCLOAK_CLIENT_SECRET_PREMIUM: ${{ secrets.KEYCLOAK_CLIENT_SECRET_BASIC }}
       KONNECT_TOKEN: ${{ secrets.KONNECT_PAT }}
+      RL_PLUS: ${{ vars.RL_PLUS }}
+      RL_PREMIUM: ${{ vars.RL_PREMIUM }}
 
     steps:
       - name: Checkout repository
