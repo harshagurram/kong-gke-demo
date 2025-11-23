@@ -18,6 +18,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      deployments: write
 
     steps:
       - name: Authenticate to Google Cloud
@@ -25,6 +26,11 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
 
       - name: Verify Identity
         run: gcloud auth list
