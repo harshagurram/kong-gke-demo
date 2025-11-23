@@ -100,6 +100,11 @@ jobs:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_LOCATION }}
           project_id: ${{ secrets.GCP_PROJECT }}
+          
+      - name: Add Kong Helm repo
+        run: |
+          helm repo add kong https://charts.konghq.com
+          helm repo update
 
       - name: Deploy Kong Primary DP
         run: |
