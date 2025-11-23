@@ -14,12 +14,7 @@ on:
 jobs:
   auth:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        env: [ ${{ github.event.inputs.env }} ]
-
-    environment: ${{ matrix.env }}
+    environment: ${{ github.event.inputs.env }}
     permissions:
       id-token: write
       contents: read
