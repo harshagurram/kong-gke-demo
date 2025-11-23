@@ -66,9 +66,6 @@ jobs:
           IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
           docker push --all-tags "$IMAGE"
 
-      - name: Output built image tag
-        run: echo "Built image tag: ${{ env.IMAGE_TAG }}"
-
   deploy_dps:
     if: ${{ github.event.inputs.deploy_dps }}
     needs: [build_image]
