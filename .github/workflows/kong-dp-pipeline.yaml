@@ -82,7 +82,8 @@ jobs:
       id-token: write
 
     env:
-      IMAGE_TAG: ${{ github.event.inputs.image_tag_input != '' ? github.event.inputs.image_tag_input : needs.build_image.outputs.image_tag }}
+      IMAGE_TAG: ${{ github.event.inputs.image_tag_input && github.event.inputs.image_tag_input || needs.build_image.outputs.image_tag }}
+
 
     steps:
       - name: Checkout repo
