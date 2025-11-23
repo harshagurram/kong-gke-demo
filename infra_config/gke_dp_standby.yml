@@ -1,0 +1,67 @@
+image:
+  repository: gcr.io/project-53673332-cd0a-4c35-91f/kong-dp
+  tag: "3.12-v1"
+
+secretVolumes:
+  - kong-dp-standby-cluster-cert
+
+admin:
+  enabled: false
+
+env:
+  role: data_plane
+  database: "off"
+  cluster_mtls: pki
+  cluster_control_plane: 2058b75471.au.cp.konghq.com:443
+  cluster_dp_labels: "type:docker-kubernetesOS,dp:dp-standby,app:kong-dp"
+  cluster_server_name: 2058b75471.au.cp.konghq.com
+  cluster_telemetry_endpoint: 2058b75471.au.tp.konghq.com:443
+  cluster_telemetry_server_name: 2058b75471.au.tp.konghq.com
+  cluster_cert: /etc/secrets/kong-dp-standby-cluster-cert/tls.crt
+  cluster_cert_key: /etc/secrets/kong-dp-standby-cluster-cert/tls.key
+  lua_ssl_trusted_certificate: system
+  konnect_mode: "on"
+  nginx_worker_processes: "1"
+  upstream_keepalive_max_requests: "100000"
+  nginx_http_keepalive_requests: "100000"
+  proxy_access_log: "off"
+  dns_stale_ttl: "3600"
+  router_flavor: expressions
+  status_listen: 0.0.0.0:8100
+  nginx_status: "on"
+  prometheus_scrape_interval: "15s"
+  plugins: bundled,prometheus
+
+ingressController:
+  enabled: false
+  installCRDs: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 768Mi
+
+manager:
+  enabled: false
+
+podLabels:
+  app: kong-dp
+
+proxy:
+  name: kong-dp-standby-proxy
+  type: ClusterIP
+  tls:
+    enabled: true
+    existingSecret: kong-dp-tls-secret
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8100"
+    prometheus.io/path: "/metrics"
+
+extraPorts:
+  - name: metrics
+    containerPort: 8100
+    protocol: TCP
