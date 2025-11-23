@@ -25,6 +25,8 @@ jobs:
     if: ${{ github.event.inputs.build_image }}
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.env }}
+    env:
+      KONG_VERSION: ${{ vars.KONG_VERSION }}
 
     permissions:
       contents: read
@@ -55,7 +57,7 @@ jobs:
       - name: Build Kong Golden Image
         run: |
           IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
-          TAG="${{ vars.KONG_VERSION }}-$(date +'%Y%m%d-%H%M%S')"
+          TAG="test-$(date +'%Y%m%d-%H%M%S')"
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
           docker buildx build \
