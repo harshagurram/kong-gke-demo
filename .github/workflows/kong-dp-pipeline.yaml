@@ -1,0 +1,128 @@
+name: Kong DP Build & Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Which Environment?"
+        required: true
+        type: choice
+        options:
+          - dev2
+          - prod
+      build_image:
+        type: boolean
+        default: true
+        description: "Build & push the golden Kong image?"
+      deploy_dps:
+        type: boolean
+        default: true
+        description: "Deploy Kong Data Planes to GKE?"
+
+jobs:
+
+  build_image:
+    if: ${{ github.event.inputs.build_image == 'true' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.env }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ secrets.GCP_AR_HOST }} --quiet
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Kong Golden Image
+        run: |
+          IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
+          TAG="${{ vars.KONG_VERSION }}-$(date +'%Y%m%d-%H%M%S')"
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+          docker buildx build \
+            --platform linux/amd64 \
+            -t "$IMAGE:$TAG" \
+            -t "$IMAGE:latest" \
+            ./infra_config
+      
+      - name: Push Kong Golden Image
+        run: |
+          IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
+          docker push --all-tags "$IMAGE"
+
+      - name: Output built image tag
+        run: echo "Built image tag: ${{ env.IMAGE_TAG }}"
+
+
+  deploy_dps:
+    if: ${{ github.event.inputs.deploy_dps == 'true' }}
+    needs: [build_image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_LOCATION }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Deploy Kong Primary DP via Helm
+        run: |
+          IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
+          TAG="${{ env.IMAGE_TAG }}"
+          echo "Deploying DP1 using image tag: $TAG"
+
+          helm upgrade \
+            kong-primary kong/kong \
+            -n kong \
+            -f infra/dp1-values.yaml \
+            --set image.repository="$IMAGE" \
+            --set image.tag="$TAG" \
+            --install
+
+      - name: Deploy Kong Secondary DP via Helm
+        run: |
+          IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
+          TAG="${{ env.IMAGE_TAG }}"
+          echo "Deploying DP2 using image tag: $TAG"
+
+          helm upgrade \
+            kong-secondary kong/kong \
+            -n kong \
+            -f infra/dp2-values.yaml \
+            --set image.repository="$IMAGE" \
+            --set image.tag="$TAG" \
+            --install
