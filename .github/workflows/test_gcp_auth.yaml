@@ -1,6 +1,15 @@
 name: Test GCP Auth
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Which Environment?"
+        required: true
+        type: choice
+        options:
+          - dev2
+          - prod
 
 jobs:
   auth:
