@@ -59,12 +59,7 @@ jobs:
           IMAGE="${{ secrets.GCP_AR_HOST }}/${{ secrets.GCP_PROJECT }}/kong-dp"
           TAG="test-$(date +'%Y%m%d-%H%M%S')"
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
-
-          docker buildx build \
-            --platform linux/amd64 \
-            -t "$IMAGE:$TAG" \
-            -t "$IMAGE:latest" \
-            ./infra_config
+          docker buildx build --platform linux/amd64 -t "$IMAGE:$TAG" -t "$IMAGE:latest" ./infra_config
       
       - name: Push Kong Golden Image
         run: |
@@ -73,7 +68,6 @@ jobs:
 
       - name: Output built image tag
         run: echo "Built image tag: ${{ env.IMAGE_TAG }}"
-
 
   deploy_dps:
     if: ${{ github.event.inputs.deploy_dps }}
