@@ -77,6 +77,7 @@ jobs:
     if: ${{ github.event.inputs.deploy_dps == 'true' }}
     needs: [build_image]
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.env }}
 
     permissions:
       contents: read
